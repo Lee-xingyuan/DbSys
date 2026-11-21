@@ -4,7 +4,6 @@ import com.example.cinema.audit.AuditService
 import com.example.cinema.cinema.CinemaRepository
 import com.example.cinema.common.*
 import com.example.cinema.movie.AdminMovieRepository
-import com.example.cinema.movie.MovieRepository
 import java.math.BigDecimal
 import java.time.*
 import org.springframework.stereotype.Service
@@ -54,8 +53,8 @@ class ScreeningService(
 
     @Transactional(readOnly = true)
     fun listScreenings(
-        movieId:Long,
-        cinemaId:Long,
+        movieId:Long?,
+        cinemaId:Long?,
         screeningDate:LocalDate,
         includeCancelled:Boolean,
         pageRequest: PageRequest
