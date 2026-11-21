@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cinema.screening.ScreeningMapper">
+    <!---  将 screening movie hall cinema 表连接起来   !-->
+    <sql id="joins">
+        from screening s join movie m
+        on m.movie_id = s.movie_id
+        join hall h on h.hall_id = s.hall_id
+        join cinema c on c.cinema_id = h.cinema_id
+    </sql>
+
+    <sql id="filter">
+        <where>
+            s.starts_at &gt;= #{startsAtFromInclusive} and s.starts_at &lt; #{startsAtToExclusive}
+            <if test="movieId != null">     and s.movie_id = #{movieId}  </if>
+            <if test="cinemaId!= null">     and h.cinema_Id = #{cinemaId} </if>
+            <if test="!includeCancelled">   and s.screening_status = 'SCHEDULED' </if>
+        </where>
+    </sql>
+
+    <sql id="columns">
+        s.*, m.title, h.cinema_id, c.cinema_name, c.address, h.hall_name,
+        (select count(*)
+        from screening_seat x
+        where x.screening_id = s.screening_id and x.inventory_status='AVAILABLE') available,
+
+        (select count(*)
+        from screening_seat x
+        where x.screening_id =s.screening_id and x.inventory_status='HELD') held,
+
+        (select count(*)
+        from screening_seat x
+        where x.screening_id = s.screening_id and x.inventory_status ='SOLD' )sold
+    </sql>
+
+    <select id="selectScreeningPage" resultType="com.example.cinema.screening.ScreeningViewRow">
+        select <include refid="columns"/>
+        <include refid="joins"/>    <include refid="filter"/>
+        order by s.starts_at ,s.screening_id
+        limit #{pageRequest.pageSize}
+        offset #{pageRequest.offset}
+    </select>
+
+    <select id="countScreenings" resultType="long">
+        select count(*)
+        <include refid="joins"/> <include refid="filter"/>
+    </select>
+
+    <select id="selectScreeningViewById" resultType="com.example.cinema.screening.ScreeningViewRow">
+        select <include refid="columns"/> <include refid="joins"/>
+        where s.screening_id = #{screeningId}
+    </select>
+
+</mapper>

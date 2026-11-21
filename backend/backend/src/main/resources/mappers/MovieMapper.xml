@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.cinema.movie.MovieMapper">
+    <resultMap id="listDetail" type="com.example.cinema.movie.MovieDetailResponse">
+        <constructor>
+        <idArg column="movie_id" javaType="_long"/>
+        <arg column="title" javaType="java.lang.String"/>
+        <arg column="synopsis" javaType="java.lang.String"/>
+        <arg column="genre" javaType="java.lang.String"/>
+        <arg column="duration_minutes" javaType="_int"/>
+        <arg column="poster_url" javaType="java.lang.String"/>
+        </constructor>
+    </resultMap>
+
+    <sql id="listedFilter">
+        <where>
+            listing_status = "LISTED"
+            <if test="keyword != null and keyword != ''">  and title like #{keyword}        </if>
+        </where>
+    </sql>
+
+    <select id="searchListed" resultMap="listDetail">
+        select movie_id ,title,synopsis,genre,duration_minutes,poster_url
+        from movie
+        <include refid="listedFilter"/>
+        order by movie_id desc limit #{pageSize} offset #{offset}
+    </select>
+
+    <select id="countListed" resultType="long">
+        select count(*)
+        from movie <include refid="listedFilter"/>
+    </select>
+
+</mapper>
