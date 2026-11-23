@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.cinema.order.TradeMapper">
+
+    <select id="selectOrderById" resultType="com.example.cinema.order.OrderRow">
+        select *
+        from ticket_order
+        where order_id=#{orderId}
+    </select>
+
+    <select id="selectOrderByIdForUpdate" resultType="com.example.cinema.order.OrderRow" useCache="false" flushCache="true">
+        select *
+        from ticket_order
+        where order_id=#{orderId}
+        for update
+    </select>
+
+    <select id="selectOrderByUserIdAndRequestKeyForUpdate" resultType="com.example.cinema.order.OrderRow" useCache="false" flushCache="true">
+        select *
+        from ticket_order
+        where user_id=#{userId} and request_key = #{requestKey}
+        for update
+    </select>
+
+    <select id="selectOrderByUserIdAndRequestKey" resultType="com.example.cinema.order.OrderRow">
+        select *
+        from ticket_order
+        where user_id=#{userId} and request_key = #{requestKey}
+    </select>
+
+    <insert id="insertPendingOrder" useGeneratedKeys="true" keyProperty="orderId" keyColumn="order_id">
+        insert into ticket_order( user_id ,screening_id , request_key ,request_digest,
+        order_status,total_amount,created_at, expires_at,
+        movie_title_snapshot, cinema_name_snapshot, hall_name_snapshot, start_time_snapshot, end_time_snapshot)
+        values( #{userId}, #{screeningId}, #{requestKey}, #{requestDigest},
+        'PENDING', #{totalAmount}, #{createdAt}, #{expiresAt},
+        #{movieTitleSnapshot}, #{cinemaNameSnapshot}, #{hallNameSnapshot}, #{startTimeSnapshot}, #{endTimeSnapshot})
+    </insert>
+
+    <insert id="insertOrderItem">
+        insert into order_item(order_id, screening_seat_id, seat_label_snapshot, ticket_price)
+        values (#{orderId}, #{screeningSeatId}, #{seatLabelSnapshot}, #{ticketPrice})
+    </insert>
+
+    <select id="selectOrderItemByOrderIds" resultType="com.example.cinema.order.ItemRow">
+        select *
+        from order_item
+        where order_id in
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+        order by order_id,order_item_id
+    </select>
+
+
+    <!-- 查询座位标签(库存) -->
+    <select id="selectSeatLabelByScreeningSeatId" resultType="com.example.cinema.screening.InventoryRow">
+        select ss.screening_seat_id ,s.row_number ,s.seatnumber , ss.inventory_status
+        from screening_seat ss join seat s
+        on s.seat_id =ss.seat_id
+        where ss,screening_seat_id #={screeningSeatId}
+    </select>
+
+    <select id="selectScreeningSeatIdsByOrderId" resultType="long">
+        select screening_seat_id
+        from order_item
+        where order_id = #{orderId}
+        order by screening_seat_id
+    </select>
+
+    <select id="selectScreeningSeatsByIdsForUpdate" resultType="com.example.cinema.order.StockRow" useCache="false" flushCache="true">
+        select *
+        from screening_seat
+        where screening_id = #{screeningId} and screening_seat_id IN
+        <foreach collection="screeningSeatIds" item="screeningSeatId" open="(" separator="," close=")">
+            #{screeningSeatId}
+        </foreach>
+        order by  screening_seat_id
+        for update
+    </select>
+
+    <update id="updateSeatsToSoldByOrderId">
+        update screening_seat
+        set inventory_status = 'SOLD'
+        where current_order_id = #{orderId} and inventory_status='HELD'
+    </update>
+
+    <!-- 通过订单号将座位设置为可用 -->
+    <update id="updateSeatsToAvailableByOrderIdAndStatus">
+        update screening_seat
+        set inventory_status = 'AVAILABLE', current_order_id = NULL
+        where current_order_id = #{orderId} and inventory_status = #{expectedInventoryStatus}
+    </update>
+
+    <!-- 更新 订单状态、支付流水和退款凭证 -->
+    <update id="updateOrderToPaid">
+        update ticket_order
+        set order_status = 'PAID', paid_at = #{paidAt}
+        where order_id = #{orderId} and order_status = 'PENDING'
+    </update>
+
+
+    <update id="updatePendingOrderToClosed">
+        update ticket_order
+        set order_status = #{targetStatus}, closed_at = #{closedAt}
+        where order_id = #{orderId} and order_status = 'PENDING'
+    </update>
+
+    <update id="updateOrderToRefunded">
+        update ticket_order
+        set order_status = 'REFUNDED'
+        where order_id = #{orderId} and order_status = 'PAID'
+    </update>
+
+    <!-- 查询这条订单(requestId)之前被支付过吗？ -->
+    <select id="selectPaymentAttemptByOrderIdAndRequestKey" resultType="com.example.cinema.order.PaymentRow">
+        select *
+        from payment_attempt
+        where order_id = #{orderId} AND request_key = #{requestKey}
+    </select>
+
+
+    <select id="selectSuccessfulPaymentByOrderId" resultType="com.example.cinema.order.PaymentRow">
+        select *
+        from payment_attempt
+        where order_id = #{orderId} and payment_result = 'SUCCESS'
+    </select>
+
+    <insert id="insertPaymentAttempt" useGeneratedKeys="true" keyProperty="paymentAttemptId" keyColumn="payment_attempt_id">
+        insert into payment_attempt (order_id, request_key, attempted_at, attempt_amount, payment_result)
+        values (#{orderId}, #{requestKey}, #{attemptedAt}, #{attemptAmount}, #{paymentResult})
+    </insert>
+
+    <select id="selectRefundByOrderId" resultType="com.example.cinema.order.RefundRow">
+        select *
+        from refund_record
+        where order_id = #{orderId}
+    </select>
+
+    <select id="selectRefundsByOrderIds" resultType="com.example.cinema.order.RefundRow">
+        select *
+        from refund_record
+        where order_id in
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </select>
+
+    <insert id="insertRefundRecord" useGeneratedKeys="true" keyProperty="refundId" keyColumn="refund_id">
+        insert into refund_record (payment_attempt_id, order_id, refund_amount, refunded_at)
+        values (#{paymentAttemptId}, #{orderId}, #{refundAmount}, #{refundedAt})
+    </insert>
+
+    <!-- 本人订单分页和总数 -->
+    <sql id="userOrderFilter">
+        where user_id = #{userId}
+        and (#{orderStatus,jdbcType=VARCHAR} is null or order_status = #{orderStatus,jdbcType=VARCHAR})
+    </sql>
+
+    <select id="selectOrderPageByUserId" resultType="com.example.cinema.order.OrderRow">
+        select *
+        from ticket_order
+        <include refid="userOrderFilter"/>
+        order by created_at desc, order_id DESC
+        limit #{pageRequest.pageSize} OFFSET #{pageRequest.offset}
+    </select>
+
+    <!--计算订单总价-->
+    <select id="countOrdersByUserId" resultType="_long">
+        select count(*)
+        from ticket_order
+        <include refid="userOrderFilter"/>
+    </select>
+
+</mapper>

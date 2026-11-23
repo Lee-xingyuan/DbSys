@@ -25,7 +25,7 @@ class ScreeningViewRow{
 
 }
 
-class InventorRow{
+class InventoryRow{
     var screeningSeatId=0L; var rowNumber=0; var seatNumber=0;
     var inventoryStatus=""
 }
@@ -70,5 +70,5 @@ data class SeatMapResponse(
     val serverTime:OffsetDateTime,
     val salesStopAt:OffsetDateTime,
     val ticketPrice:String,
-    val seats:List<InventorRow>
+    val seats:List<InventoryRow>
 )
