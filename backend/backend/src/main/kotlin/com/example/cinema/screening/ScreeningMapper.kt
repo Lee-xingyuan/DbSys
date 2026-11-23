@@ -105,7 +105,7 @@ interface ScreeningMapper {
         order by s.`row_number` , s.seat_number 
         
     """)
-    fun selectScreeningSeatsByScreeningId(screeningId:Long) : List<InventorRow>
+    fun selectScreeningSeatsByScreeningId(screeningId:Long) : List<InventoryRow>
 
     //by xml
     fun selectScreeningPage(

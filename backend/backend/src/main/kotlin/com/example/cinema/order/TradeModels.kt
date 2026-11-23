@@ -7,10 +7,10 @@ import java.util.UUID
 class OrderRow{
     var orderId = 0L; var userId=0L; var screeningId=0L;
     var requestKey=""; var requestDigest=""; var orderStatus=""
-    var totalAmount=BigDecimal.ZERO ; var created=LocalDateTime.MIN; var expiresAt=LocalDateTime.MIN
+    var totalAmount=BigDecimal.ZERO ; var createdAt=LocalDateTime.MIN; var expiresAt=LocalDateTime.MIN
     var paidAt:LocalDateTime?=null; ;  var closedAt:LocalDateTime?=null
-    var movieTitleSnapshot=""; var cinemaNameSnapShot=""; var hallNameSnapshot=""
-    var startTimeSnapshot=LocalDateTime.MIN; var endTimeSnapshot=LocalDateTime.MIN
+    var movieTitleSnapshot=""; var cinemaNameSnapshot=""; var hallNameSnapshot=""
+    var startTimeSnapshot=LocalDateTime.MIN;  var endTimeSnapshot=LocalDateTime.MIN
 }
 
 class StockRow{
@@ -26,8 +26,8 @@ class ItemRow{
 }
 
 class PaymentRow{
-    var paymentAttempId=0L; var orderId=0L; var requesKey=""
-    var attempedAt=LocalDateTime.MIN ; var attempAmount=BigDecimal.ZERO
+    var paymentAttemptId=0L; var orderId=0L; var requestKey=""
+    var attemptedAt=LocalDateTime.MIN ; var attemptAmount=BigDecimal.ZERO
     var paymentResult=""
 }
 
@@ -37,7 +37,7 @@ class RefundRow{
     var refundedAt=LocalDateTime.MIN
 }
 
-data class CreatedOrderInput(
+data class CreateOrderInput(
     val screeningId: Long,
     val revision: Int,
     val screeningSeatIds: List<Long>,
@@ -75,10 +75,10 @@ data class OrderResponse(
     val movieTitle: String,
     val cinemaName: String,
     val hallName: String,
-    val startsAt: LocalDateTime,
-    val endsAt: LocalDateTime,
+    val startsAt: OffsetDateTime,
+    val endsAt: OffsetDateTime,
     val items:List<ItemResponse>,
-    val totalAmount: BigDecimal,
+    val totalAmount: String,
     val createdAt: OffsetDateTime,
     val expiresAt: OffsetDateTime,
     val paidAt: OffsetDateTime?,

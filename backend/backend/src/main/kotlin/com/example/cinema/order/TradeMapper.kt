@@ -26,7 +26,7 @@ interface TradeMapper {
 
     fun insertOrderItem(orderItem: ItemRow):Int
 
-    fun selectOrderItemsByOrderId(
+    fun selectOrderItemsByOrderIds(
         @Param("orderIds") orderIds:List<Long>
     ):List<ItemRow>
 
@@ -43,7 +43,7 @@ interface TradeMapper {
         @Param("orderId") orderId:Long,
         @Param("screeningSeatId") screeningSeatId:Long,
         @Param("screeningId") screeningId:Long
-    )
+    ):Int
 
     fun updateSeatsToSoldByOrderId(orderId: Long): Int
 
