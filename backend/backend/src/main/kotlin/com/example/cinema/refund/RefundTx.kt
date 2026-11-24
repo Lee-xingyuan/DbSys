@@ -19,16 +19,33 @@ class RefundTx(
     private val clock: Clock
 ) {
     @Transactional(isolation=Isolation.READ_COMMITTED)
-    fun refundOrder(userId: Long,orderId: Long,requestId: String): RefundResponse {
-        val order=tradeRepository.lockOrderForOperation(orderId,userId); val tradeMapper=tradeRepository.mapper
-        if(order.orderStatus=="REFUNDED") return checkNotNull(tradeMapper.selectRefundByOrderId(orderId)).toResponse()
-        if(order.orderStatus!="PAID") conflict("NOT_REFUNDABLE","订单不能退款")
-        val lockedSeats=tradeRepository.lockOrderSeatsWithStatus(order,"SOLD"); val currentTime=getCurrentBusinessTime(clock)
-        if(!TradeTime.canRefund(currentTime,order.startTimeSnapshot)) conflict("REFUND_DEADLINE_PASSED","已过开场前30分钟退票截止点")
-        val successfulPayment=checkNotNull(tradeMapper.selectSuccessfulPaymentByOrderId(orderId)); check(successfulPayment.attemptAmount.compareTo(order.totalAmount)==0)
-        val refund=RefundRow().also { it.orderId=orderId; it.paymentAttemptId=successfulPayment.paymentAttemptId; it.refundAmount=order.totalAmount; it.refundedAt=currentTime }
+    fun refundOrder(userId: Long,orderId: Long,requestId: String)
+    : RefundResponse {
+        val order=tradeRepository.lockOrderForOperation(orderId,userId)
+        val tradeMapper=tradeRepository.mapper
+        if(order.orderStatus=="REFUNDED")
+            return checkNotNull(tradeMapper.selectRefundByOrderId(orderId)).toResponse()
+        if(order.orderStatus!="PAID")
+            conflict("NOT_REFUNDABLE","订单不能退款")
+        val lockedSeats=tradeRepository
+                .lockOrderSeatsWithStatus(order,"SOLD")
+        val currentTime=getCurrentBusinessTime(clock)
+
+        if(!TradeTime.canRefund(currentTime,order.startTimeSnapshot))
+            conflict("REFUND_DEADLINE_PASSED","已过开场前30分钟退票截止点")
+
+        val successfulPayment=checkNotNull(tradeMapper.selectSuccessfulPaymentByOrderId(orderId));
+
+        check(successfulPayment.attemptAmount.compareTo(order.totalAmount)==0)
+        val refund=RefundRow().also{
+            it.orderId=orderId;
+            it.paymentAttemptId=successfulPayment.paymentAttemptId;
+            it.refundAmount=order.totalAmount;
+            it.refundedAt=currentTime }
+
         checkSingleRowAffected(tradeMapper.insertRefundRecord(refund)); check(refund.refundId>0)
         checkSingleRowAffected(tradeMapper.updateOrderToRefunded(orderId)); check(tradeMapper.updateSeatsToAvailableByOrderIdAndStatus(orderId,"SOLD")==lockedSeats.size)
+
         audit.recordAuditLog(
             actorUserId = userId,
             actionType = "REFUND",
