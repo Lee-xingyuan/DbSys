@@ -85,8 +85,8 @@ data class OrderResponse(
     val closedAt: OffsetDateTime?,
     val refund:RefundResponse?,
     val serverTime:OffsetDateTime,
-    val refundAble:Boolean,
-    val refundDate:OffsetDateTime
+    val refundable:Boolean,
+    val refundDeadline:OffsetDateTime
 )
 
 data class OperationResponse(

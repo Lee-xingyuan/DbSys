@@ -124,7 +124,7 @@ class CinemaService(
             cinemaMapper.selectCinemaByIdForUpdate(resourceId) ?: notFound("影院不存在")
             if( cinemaMapper.selectFutureScreeningIdByCinemaIdForUpdate(
                     resourceId, currentTime) != null  )
-                conflict("FUTURE_SCREENING","影院仍有未来场次")
+                conflict("FUTURE_SCREENINGS","影院仍有未来场次")
             cinemaMapper.updateCinemaToInactive(resourceId)
         }
         else{

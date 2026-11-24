@@ -42,7 +42,7 @@ data class ScreeningUpdate(
     val hallId:Long,
     val startsAt:OffsetDateTime,
     val ticketPrice:BigDecimal,
-    val expectedRevison:Int
+    val expectedRevision:Int
 )
 
 data class RevisionInput(val expectedRevision: Int)

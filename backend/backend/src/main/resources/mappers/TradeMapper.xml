@@ -42,7 +42,7 @@
         values (#{orderId}, #{screeningSeatId}, #{seatLabelSnapshot}, #{ticketPrice})
     </insert>
 
-    <select id="selectOrderItemByOrderIds" resultType="com.example.cinema.order.ItemRow">
+    <select id="selectOrderItemsByOrderIds" resultType="com.example.cinema.order.ItemRow">
         select *
         from order_item
         where order_id in
@@ -55,10 +55,10 @@
 
     <!-- 查询座位标签(库存) -->
     <select id="selectSeatLabelByScreeningSeatId" resultType="com.example.cinema.screening.InventoryRow">
-        select ss.screening_seat_id ,s.row_number ,s.seatnumber , ss.inventory_status
+        select ss.screening_seat_id ,s.row_number ,s.seat_number , ss.inventory_status
         from screening_seat ss join seat s
         on s.seat_id =ss.seat_id
-        where ss,screening_seat_id #={screeningSeatId}
+        where ss.screening_seat_id = #{screeningSeatId}
     </select>
 
     <select id="selectScreeningSeatIdsByOrderId" resultType="long">
@@ -78,6 +78,13 @@
         order by  screening_seat_id
         for update
     </select>
+
+    <update id="updateSeatToHeld">
+        update screening_seat
+        set inventory_status = 'HELD' , current_order_id = #{orderId}
+        where screening_seat_id = #{screeningSeatId} and screening_id = #{screeningId}
+            and inventory_status = 'AVAILABLE'  and current_order= is null
+    </update>
 
     <update id="updateSeatsToSoldByOrderId">
         update screening_seat

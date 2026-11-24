@@ -10,6 +10,7 @@ import java.time.LocalDate
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
+@RestController
 class ScreeningController(private val screeningService: ScreeningService
     ) {
     @GetMapping("/api/movies/{id}/screenings")
@@ -21,7 +22,7 @@ class ScreeningController(private val screeningService: ScreeningService
         @RequestParam(defaultValue="20") pageSize: Int
     )=screeningService.listScreenings(movieId,cinemaId,screeningDate,false,PageRequest(page,pageSize))
 
-    @GetMapping("/api/movies/{id}/seats")
+    @GetMapping("/api/screenings/{id}/seats")
     fun getScreeningSeatMap(
         @PathVariable(name = "id") screeningId: Long,
     )=screeningService.getScreeningSeatMap(screeningId)
@@ -70,7 +71,7 @@ class ScreeningController(private val screeningService: ScreeningService
     )=screeningService.saveScreening(
         screeningId,
         ScreeningInput(screeningRequest.movieId,screeningRequest.hallId,screeningRequest.startsAt,screeningRequest.ticketPrice),
-        screeningRequest.expectedRevison,
+        screeningRequest.expectedRevision,
         requireAdminUserId(principal),
         getRequestId(httpServletRequest),
     )

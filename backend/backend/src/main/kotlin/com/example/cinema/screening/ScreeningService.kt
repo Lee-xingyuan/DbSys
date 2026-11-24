@@ -221,8 +221,9 @@ class ScreeningService(
     fun cancelScreening(screeningId: Long,
                         expectedRevision: Int,
                         actorUserId: Long,
-                        requestId: String):
-            ScreeningResponse {
+                        requestId: String
+    ): ScreeningResponse {
+
             val originalScreening=mapper.selectScreeningById(screeningId) ?: notFound("场次不存在");
             lockParentResources(originalScreening,originalScreening.movieId,originalScreening.hallId)
 

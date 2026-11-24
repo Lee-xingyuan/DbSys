@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.cinema.review.ReviewMapper">
+    <select id="selectQualifyingOrderId" resultType="long">
+        select o.order_id
+        from ticket_order as o join screening as s
+        on o.screening_id = s.screening_id
+        where o.user_id = #{userId} and s.movie_id =#{movieId}
+            and order_status='PAID' and o.end_time_snapshot &lt;= #{currentTime}
+        order by o.order_id
+        limit 1
+    </select>
+
+
+</mapper>

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/orders")
-class OrdersController(private val orderService: OrderService,private val orderQuery: OrderQuery) {
+class OrderController(private val orderService: OrderService,private val orderQuery: OrderQuery) {
     @PostMapping
     fun createOrder(
         @AuthenticationPrincipal principal: CinemaPrincipal,

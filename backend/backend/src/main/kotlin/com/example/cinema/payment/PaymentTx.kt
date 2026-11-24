@@ -43,6 +43,13 @@ class PaymentTx(
                                                 existingPayment.toResponse()
             ))
         }
+        // 缺少 orderStatus == "PAID" 的判断
+        if(order.orderStatus=="PAID")
+
+            return TradeOutcome.Done(OperationResponse(
+                tradeRepository.getOrderResponseById(orderId,getCurrentBusinessTime(clock)),
+            ))
+
         if(order.orderStatus != "PENDING")
             conflict("ORDER_NOT_PENDING","当前订单不能支付")
         val lockedSeats =tradeRepository.lockOrderSeatsWithStatus(order,"HELD")

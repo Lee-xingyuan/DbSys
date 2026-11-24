@@ -20,7 +20,7 @@ interface MovieMapper {
     @Select("""
         select movie_id,title,synopsis,genre,duration_minutes,poster_url
         from movie
-        where movie_id = #{movieId} and listing_status = 'Listed'
+        where movie_id = #{movieId} and listing_status = 'LISTED'
     """)
     fun findListedById(@Param("movieId") movieId: Long) : MovieDetailResponse?
 

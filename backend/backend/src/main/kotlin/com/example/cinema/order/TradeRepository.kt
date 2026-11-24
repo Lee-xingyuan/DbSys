@@ -45,8 +45,7 @@ class TradeRepository(val mapper: TradeMapper , val screeningRepository: Screeni
                     it.screeningId==order.screeningId &&
                     it.currentOrderId==order.orderId &&
                     it.inventoryStatus==expectedInventoryStatus
-                })
-        { "订单与库存不一致" }
+                }) { "订单与库存不一致" }
         return lockedSeats
     }
 
@@ -81,8 +80,7 @@ class TradeRepository(val mapper: TradeMapper , val screeningRepository: Screeni
             order.closedAt?.asApiTime(),
             refundsByOrderId[order.orderId]?.toResponse(),
             currentTime.asApiTime(),
-            order.orderStatus=="PAID" && TradeTime.canRefund(currentTime,
-            order.startTimeSnapshot),
+            order.orderStatus=="PAID" && TradeTime.canRefund(currentTime, order.startTimeSnapshot),
             order.startTimeSnapshot.minusMinutes(30).asApiTime()) }
     }
 
