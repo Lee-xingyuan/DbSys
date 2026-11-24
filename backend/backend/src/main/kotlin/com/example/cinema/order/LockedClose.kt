@@ -20,7 +20,7 @@ class LockedClose(private val tradeRepository: TradeRepository){
     ){
         check(order.orderStatus == "PENDING" && lockedSeats.size in 1..4)
         check(lockedSeats.all {it.screeningId == order.screeningId  && it.currentOrderId == order.orderId && it.inventoryStatus == "HELD"})
-        val isExpired = TradeTime.canPay(currentTime, order.expiresAt,order.startTimeSnapshot)
+        val isExpired = !TradeTime.canPay(currentTime, order.expiresAt,order.startTimeSnapshot)
         check(!isExpired || requestedCancel)
             {"未到期订单不能由超时任务关闭"}
         checkSingleRowAffected(tradeRepository.mapper.updatePendingOrderToClosed(order.orderId,if(isExpired) "EXPIRED" else "CANCELLED",currentTime))
