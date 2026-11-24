@@ -110,8 +110,8 @@ object TradeTime {
         currentTime<startsAt.minusMinutes(30)
 }
 
-fun calculateOrderRequestDigest(order: CreatedOrderInput): String=
-        java.security.MessageDigest.getInstance("SHA-256")
-            .digest("${order.screeningId}:${order.revision}:${order.screeningSeatIds.sorted().joinToString(",")}"
+fun calculateOrderRequestDigest(order: CreateOrderInput)
+    : String= java.security.MessageDigest.getInstance("SHA-256")
+                .digest("${order.screeningId}:${order.revision}:${order.screeningSeatIds.sorted().joinToString(",")}"
                 .toByteArray(Charsets.UTF_8))
-            .joinToString("") { "%02x".format(it.toInt() and 255) }
+                .joinToString("") { "%02x".format(it.toInt() and 255) }

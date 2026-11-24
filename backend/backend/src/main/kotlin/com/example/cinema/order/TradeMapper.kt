@@ -62,6 +62,11 @@ interface TradeMapper {
         @Param("closedAt") closedAt: LocalDateTime
     ): Int
 
+    fun selectPaymentAttemptByOrderIdAndRequestKey(
+        @Param("orderId") orderId: Long,
+        @Param("requestKey") requestKey: String
+    ): PaymentRow?
+
     fun selectSuccessfulPaymentByOrderId(orderId: Long): PaymentRow?
 
     fun insertPaymentAttempt(paymentAttempt: PaymentRow): Int
