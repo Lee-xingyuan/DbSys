@@ -103,6 +103,7 @@ object TradeTime {
     fun calculateExpiresAt(createdAt: LocalDateTime,startsAt: LocalDateTime)=
         minOf(createdAt.plusMinutes(10),startsAt.minusMinutes(5))
 
+    //check 时间
     fun canPay(currentTime: LocalDateTime,expiresAt: LocalDateTime,startsAt: LocalDateTime)=
         currentTime<expiresAt && currentTime<startsAt.minusMinutes(5)
 
