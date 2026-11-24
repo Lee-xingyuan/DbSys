@@ -43,7 +43,7 @@ class PaymentTx(
                                                 existingPayment.toResponse()
             ))
         }
-        if(order.orderStatus == "PENDING")
+        if(order.orderStatus != "PENDING")
             conflict("ORDER_NOT_PENDING","当前订单不能支付")
         val lockedSeats =tradeRepository.lockOrderSeatsWithStatus(order,"HELD")
         val currentTime=getCurrentBusinessTime(clock)
