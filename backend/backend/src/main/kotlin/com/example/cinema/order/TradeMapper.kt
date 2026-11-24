@@ -62,6 +62,8 @@ interface TradeMapper {
         @Param("closedAt") closedAt: LocalDateTime
     ): Int
 
+    fun updateOrderToRefunded(orderId: Long): Int
+
     fun selectPaymentAttemptByOrderIdAndRequestKey(
         @Param("orderId") orderId: Long,
         @Param("requestKey") requestKey: String
