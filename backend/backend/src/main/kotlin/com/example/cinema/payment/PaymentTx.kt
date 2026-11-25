@@ -43,7 +43,6 @@ class PaymentTx(
                                                 existingPayment.toResponse()
             ))
         }
-        // 缺少 orderStatus == "PAID" 的判断
         if(order.orderStatus=="PAID")
 
             return TradeOutcome.Done(OperationResponse(
@@ -71,16 +70,16 @@ class PaymentTx(
         if(paymentRequest.simulationResult == PaymentResult.SUCCESS){
             checkSingleRowAffected(tradeMapper.updateOrderToPaid(orderId,currentTime))
             check(tradeMapper.updateSeatsToSoldByOrderId(orderId)==lockedSeats.size)
+            audit.recordAuditLog(
+                actorUserId = userId,
+                actionType = "SIMULATED_PAYMENT",
+                targetType = "ORDER",
+                targetId = orderId,
+                occurredAt = currentTime,
+                requestId = requestId,
+                changeSummary = "模拟支付结果：${paymentRequest.simulationResult}"
+            )
         }
-        audit.recordAuditLog(
-            actorUserId = userId,
-            actionType = "SIMULATED_PAYMENT",
-            targetType = "ORDER",
-            targetId = orderId,
-            occurredAt = currentTime,
-            requestId = requestId,
-            changeSummary = "模拟支付结果：${paymentRequest.simulationResult}"
-        )
         return TradeOutcome.Done(
             OperationResponse(
                 tradeRepository.getOrderResponseById(orderId,currentTime),

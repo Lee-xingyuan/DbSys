@@ -56,7 +56,8 @@ data class RefundResponse(
     val orderId: Long,
     val paymentAttemptId: Long,
     val refundAmount: String,
-    val refundedAt: OffsetDateTime
+    val refundedAt: OffsetDateTime,
+    val orderStatus : String
 )
 
 data class PaymentResponse(

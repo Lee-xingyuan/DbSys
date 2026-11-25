@@ -19,13 +19,15 @@ class OrderService(private val creationService: CreateOrderTx, private val order
                 val sqlException = generateSequence<Throwable>(exception) {it.cause}
                     .filterIsInstance<SQLException>()
                     .firstOrNull{it.errorCode == 1062}
-                if(
-                    sqlException == null || !(
-                            sqlException.message.orEmpty().contains("ticket_order.user_id") ||
-                            sqlException.message.orEmpty().contains("user_id")
-                            )
-                )
-                throw exception
+                // create.sql的UNIQUE(user_id,request_key)由MySQL命名为user_id。
+                // 仅这个索引走恢复，order_item等其他唯一键错误继续抛出。
+                val keyName = sqlException?.message.orEmpty()
+                    .substringAfterLast(" for key '", "")
+                    .substringBefore("'", "")
+
+                if (keyName != "ticket_order.user_id" && keyName != "user_id")
+                    throw exception
+
                 return orderQuery.getOrderForIdempotentReplay(userId, orderRequest)
             }
             catch (exception:TransientDataAccessException){

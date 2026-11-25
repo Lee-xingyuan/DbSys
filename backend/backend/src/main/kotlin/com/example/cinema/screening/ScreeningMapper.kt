@@ -17,22 +17,25 @@ interface ScreeningMapper {
         where screening_id=#{screeningId} 
         for update
         """)
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectScreeningByIdForUpdate(@Param("screeningId") screeningId: Long): ScreeningRow?
 
     @Select("""
         select screening_id
         from screening
         where hall_id=#{hallId} and screening_status='SCHEDULED' 
-            and screening_id <>#{excludeScreeningId} 
-            and starts_at < #{newEndsAtWithCleanUp}  and DATE_ADD(ends_at,interval 15 minute)  > #{newStartsAt}
+            and screening_id <>#{excludedScreeningId} 
+            and starts_at < #{newEndsAtWithCleanup}  and DATE_ADD(ends_at,interval 15 minute)  > #{newStartsAt}
         order by screening_id 
         for update
     """)
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectConflictingScreeningIdsForUpdate
                 (@Param("hallId") hallId: Long,
-                 @Param("excludeScreeningId") excludeScreeningId: Long,
+                 @Param("excludedScreeningId") excludeScreeningId: Long,
                  @Param("newStartsAt") newStartsAt: LocalDateTime,
-                 @Param("newEndsAtWithCleanUp") newEndsAtWithCleanUp: LocalDateTime
+                 @Param("newEndsAtWithCleanup") newEndsAtWithCleanUp: LocalDateTime
                  ): List<Long>
 
     @Select("""
@@ -42,6 +45,7 @@ interface ScreeningMapper {
         limit 1 
         for update
     """)
+    // FIXME(文档不一致) 手册 2.1 要求锁查询标注 @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectOrderIdByScreeningIdForUpdate(
         @Param("screeningId") screeningId: Long
     ):Long?

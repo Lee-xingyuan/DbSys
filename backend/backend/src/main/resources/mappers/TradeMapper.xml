@@ -79,11 +79,11 @@
         for update
     </select>
 
-    <update id="updateSeatToHeld">
+     <update id="updateSeatToHeld">
         update screening_seat
         set inventory_status = 'HELD' , current_order_id = #{orderId}
         where screening_seat_id = #{screeningSeatId} and screening_id = #{screeningId}
-            and inventory_status = 'AVAILABLE'  and current_order= is null
+            and inventory_status = 'AVAILABLE'  and current_order_id  is null
     </update>
 
     <update id="updateSeatsToSoldByOrderId">

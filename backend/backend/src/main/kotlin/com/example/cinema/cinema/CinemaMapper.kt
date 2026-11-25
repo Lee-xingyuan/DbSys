@@ -14,6 +14,8 @@ interface CinemaMapper {
     fun selectCinemaById(@Param("cinemaId") cinemaId: Long): CinemaRow?
 
     @Select("select * from cinema where cinema_id=#{cinemaId} for update")
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectCinemaByIdForUpdate(@Param("cinemaId") cinemaId: Long): CinemaRow?
 
     @Insert("""
@@ -27,6 +29,8 @@ interface CinemaMapper {
     fun selectHallById(@Param("hallId") hallId: Long): HallRow?
 
     @Select("select * from hall where hall_id=#{hallId} for update")
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectHallByIdForUpdate(@Param("hallId") hallId: Long): HallRow?
 
     @Insert("""
@@ -84,6 +88,8 @@ interface CinemaMapper {
         where hall_id=#{hallId} 
         limit 1 for update
     """)
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectScreeningByHallIdForUpdate(hallId:Long):Long?
 
     @Select("""
@@ -92,6 +98,8 @@ interface CinemaMapper {
         where hall_id=#{hallId} and screening_status= 'SCHEDULED' and starts_at > #{currentTime} 
           limit 1 for update
     """)
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectFutureScreeningIdByHallIdForUpdate(@Param("hallId")hallId:Long,
                                                  @Param("currentTime") currentTime: LocalDateTime):Long?
 
@@ -102,6 +110,8 @@ interface CinemaMapper {
             and s.screening_status='SCHEDULED' and s.starts_at > #{currentTime}
         limit 1 for update
     """)
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectFutureScreeningIdByCinemaIdForUpdate(@Param("cinemaId") cinemaId: Long,
                                                    @Param("currentTime") currentTime: LocalDateTime):Long?
 

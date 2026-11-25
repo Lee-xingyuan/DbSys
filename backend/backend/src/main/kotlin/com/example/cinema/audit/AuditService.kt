@@ -24,7 +24,9 @@ class AuditService(private val repository: AuditRepository) {
         require(targetType.isNotBlank() && targetType.length <= 40 && targetId > 0)
         require(requestId.isNotBlank() && requestId.length <= 64)
         require(changeSummary.isNotBlank() && changeSummary.length <= 500)
-        require(actionReason?.isNotBlank() == null || actionReason.length <= 255)
+
+        val normalizedReason = actionReason?.trim()?.takeIf { it.isNotEmpty() }
+        require(normalizedReason == null || normalizedReason.length <= 255)
         repository.insert(
             actorUserId ,
             actionType,
@@ -33,7 +35,7 @@ class AuditService(private val repository: AuditRepository) {
             occurredAt,
             requestId,
             changeSummary,
-            actionReason
+            normalizedReason
         )
 
     }

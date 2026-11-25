@@ -10,6 +10,8 @@ interface AdminMovieMapper {
     fun selectMovieById( movieId:Long ) : MovieRow?
 
     @Select("select * from movie where movie_id=#{movieId} for update")
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectMovieByIdForUpdate( movieId:Long ) : MovieRow?
 
     @Insert("""
@@ -42,6 +44,8 @@ interface AdminMovieMapper {
         where movie_id=#{movieId} and screening_status='SCHEDULED' and starts_at > #{currentTime} 
         limit 1 for update
     """)
+
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
     fun selectFutureScreeningIdByMovieIdForUpdate(
         @Param("movieId")   movieId:Long,
         @Param("currentTime")currentTime: LocalDateTime

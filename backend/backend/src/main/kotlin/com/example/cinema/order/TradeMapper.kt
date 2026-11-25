@@ -36,7 +36,7 @@ interface TradeMapper {
 
     fun selectScreeningSeatsByIdsForUpdate(
         @Param("screeningId") screeningId:Long,
-        @Param("screeningSeatId") screeningSeatIds:List<Long>
+        @Param("screeningSeatIds") screeningSeatIds:List<Long>
     ):List<StockRow>
 
     fun updateSeatToHeld(

@@ -43,7 +43,7 @@ class AdminMovieService(
         movie.genre = trimAndValidateText(movieRequest.genre,40)
 
         if(movieRequest.durationMinutes !in 1..32767 || movie.synopsis.toByteArray(Charsets.UTF_8).size > 65535)
-            badRequest("INVALIDATE_MOVIE","片长或者简介无效")
+            badRequest("INVALID_MOVIE","片长或者简介无效")
         val poster = movieRequest.posterUrl?.trim()?.takeIf{ it.isNotEmpty() }
         if(poster!=null) {
             val u=try {
@@ -66,7 +66,7 @@ class AdminMovieService(
             check(movie.movieId>0)
         }
         else
-            movieMapper.updateMovie(movie)
+            checkSingleRowAffected(movieMapper.updateMovie(movie))
 
         audit.recordAuditLog(
             actorUserId,
@@ -89,7 +89,8 @@ class AdminMovieService(
     ):MovieRow{
         val movie =movieMapper.selectMovieByIdForUpdate(movieId) ?: notFound("影片不存在")
         if(!listed && movieMapper.selectFutureScreeningIdByMovieIdForUpdate(movieId,getCurrentBusinessTime(clock)) != null)
-            conflict("FUTURE_SCREENING","影片仍有未来场次")
+
+            conflict("FUTURE_SCREENINGS","影片仍有未来场次")
 
         if(listed){
             trimAndValidateText(movie.title,120)

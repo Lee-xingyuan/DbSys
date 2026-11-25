@@ -59,12 +59,14 @@ class CinemaService(
         cinema.address = trimAndValidateText(cinemaRequest.address, 255)
         cinema.contactPhone = trimAndValidateText(cinemaRequest.contactPhone, 32)
 
-        if (!cinema.contactPhone.matches(Regex("[0-9+()-]{3,32}")))
+        if (!cinema.contactPhone.matches(Regex("[0-9+() -]{3,32}")))
             badRequest("INVALID_PHONE", "联系电话格式错误")
         if (cinemaId == null) {
             checkSingleRowAffected(cinemaMapper.insertCinema(cinema))
             check(cinema.cinemaId > 0)
-        } else cinemaMapper.updateCinema(cinema)
+        }
+        else checkSingleRowAffected(cinemaMapper.updateCinema(cinema))
+
         audit.recordAuditLog(
             actorUserId,
             "CINEMA_SAVE",
@@ -96,7 +98,8 @@ class CinemaService(
                 checkSingleRowAffected(cinemaMapper.insertHall(hall))
                 check(hall.hallId > 0)
             }
-            else cinemaMapper.updateHall(hall)
+            else
+                checkSingleRowAffected(cinemaMapper.updateHall(hall))
         }
         catch (e: DuplicateKeyException) {
             conflict("HALL_EXISTS","同影院影厅名重复")}

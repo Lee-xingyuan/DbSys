@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 
 
 fun RefundRow.toResponse()=
-    RefundResponse(refundId,orderId,paymentAttemptId,refundAmount.asMoney(),refundedAt.asApiTime())
+    RefundResponse(refundId,orderId,paymentAttemptId,refundAmount.asMoney(),refundedAt.asApiTime(),"REFUNDED")
 
 fun PaymentRow.toResponse()
     =PaymentResponse(paymentAttemptId,orderId,requestKey,attemptedAt.asApiTime(),attemptAmount.asMoney(),paymentResult)
@@ -62,26 +62,26 @@ class TradeRepository(val mapper: TradeMapper , val screeningRepository: Screeni
 
         return orders.map {
             order -> OrderResponse(
-            order.orderId,
-            order.screeningId,
-            order.orderStatus,
-            order.movieTitleSnapshot,
-            order.cinemaNameSnapshot,
-            order.hallNameSnapshot,
-            order.startTimeSnapshot.asApiTime(),
-            order.endTimeSnapshot.asApiTime(),
-            itemsByOrderId[order.orderId].orEmpty().map {
+            orderId=order.orderId,
+            screeningId = order.screeningId,
+            status = order.orderStatus,
+            movieTitle = order.movieTitleSnapshot,
+            cinemaName = order.cinemaNameSnapshot,
+            hallName =  order.hallNameSnapshot,
+            startsAt = order.startTimeSnapshot.asApiTime(),
+            endsAt= order.endTimeSnapshot.asApiTime(),
+            items=itemsByOrderId[order.orderId].orEmpty().map {
                 ItemResponse(it.screeningSeatId,it.seatLabelSnapshot,it.ticketPrice.asMoney())
             },
-            order.totalAmount.asMoney(),
-            order.createdAt.asApiTime(),
-            order.expiresAt.asApiTime(),
-            order.paidAt?.asApiTime(),
-            order.closedAt?.asApiTime(),
-            refundsByOrderId[order.orderId]?.toResponse(),
-            currentTime.asApiTime(),
-            order.orderStatus=="PAID" && TradeTime.canRefund(currentTime, order.startTimeSnapshot),
-            order.startTimeSnapshot.minusMinutes(30).asApiTime()) }
+            totalAmount=order.totalAmount.asMoney(),
+            createdAt =   order.createdAt.asApiTime(),
+            expiresAt =  order.expiresAt.asApiTime(),
+            paidAt =  order.paidAt?.asApiTime(),
+            closedAt =  order.closedAt?.asApiTime(),
+            refund =   refundsByOrderId[order.orderId]?.toResponse(),
+            serverTime =  currentTime.asApiTime(),
+            refundable =  order.orderStatus=="PAID" && TradeTime.canRefund(currentTime, order.startTimeSnapshot),
+            refundDeadline =  order.startTimeSnapshot.minusMinutes(30).asApiTime()) }
     }
 
     fun getOrderResponseById(
